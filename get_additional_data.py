@@ -63,7 +63,7 @@ for url in tqdm(urls):
 # conn = sqlite3.connect('filevine_casestudy.db')
 # oyez_df.to_sql('oyez', conn, if_exists='replace')
 
-additional_data_df.to_csv('oyez_smaller.csv')
+additional_data_df.to_csv('./data/oyez_smaller.csv')
 
 with open('bad_urls_one.csv', 'w', newline='\n') as file:
     writer = csv.writer(file)

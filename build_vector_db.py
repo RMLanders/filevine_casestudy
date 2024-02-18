@@ -11,6 +11,9 @@ import pprint
 # docker run --name marqo -it -p 8882:8882 marqoai/marqo:latest
 
 df = pd.read_csv('./data/filevine_case_study_justice - train set_source data set.csv')
+model = "hf/multilingual-e5-large"
+url = "http://localhost:8882"
+
 
 def find_tags(txt):
     soup = BeautifulSoup(txt, 'html.parser')
@@ -24,24 +27,20 @@ def clean_text(txt):
     clean_text = clean_text.lower()
     return clean_text
 
-df['facts'].apply(find_tags).to_csv('tags.csv')
+def create_marqo_client(url):
+    mq = marqo.Client(url=url)
+    return mq
 
 df['facts_clean'] = df['facts'].apply(clean_text)
-
 clean_df = df[['href', 'facts_clean', 'first_party_winner']].to_dict('records')
 
-mq = marqo.Client(url="http://localhost:8882")
-
-mq.create_index("filevine_docs_whole", model="hf/multilingual-e5-large")
-
+mq = create_marqo_client(url)
+mq.create_index("filevine_docs_whole", model=model)
 mq.index("filevine_docs_whole").add_documents(
     clean_df,
     tensor_fields=["facts_clean"],
-    client_batch_size=50,
-    auto_refresh=False
+    client_batch_size=50
 )
-
-mq = marqo.Client(url="http://localhost:8882")
 
 settings = {
     "textPreprocessing": {
@@ -50,12 +49,10 @@ settings = {
         "splitMethod": "sentence",
     },
 }
-
 mq.create_index("filevine_docs_sentences", 
                 model="hf/multilingual-e5-large",
                 settings_dict=settings
 )
-
 mq.index("filevine_docs_sentences").add_documents(
     clean_df,
     tensor_fields=["facts_clean"],
