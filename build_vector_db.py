@@ -39,29 +39,28 @@ df['issue_area'] = df['issue_area'].apply(clean_text)
 df['legal_question'] = df['legal_question'].apply(clean_text)
 df['conclusion'] = df['conclusion'].apply(clean_text)
 clean_df = df[['href', 'first_party_winner', 'facts', 'issue_area', 'legal_question', 'conclusion']].to_dict('records')
-print(clean_df.describe())
 
 mq = create_marqo_client(url)
 
-mq.create_index("whole", model=model)
-mq.index("whole").add_documents(
-    clean_df,
-    tensor_fields=['facts_clean', 'issue_area', 'legal_question', 'conclusion'],
-    client_batch_size=50
-)
+# mq.create_index("whole", model=model)
+# mq.index("whole").add_documents(
+#     clean_df,
+#     tensor_fields=['facts_clean', 'issue_area', 'legal_question', 'conclusion'],
+#     client_batch_size=50
+# )
 
 settings = {
     "textPreprocessing": {
-        "splitLength": 2,
+        "splitLength": None,
         "splitOverlap": 0,
         "splitMethod": "sentence",
     },
 }
-mq.create_index("sentences", 
+mq.create_index("sentences_n", 
                 model=model,
                 settings_dict=settings
 )
-mq.index("sentences").add_documents(
+mq.index("sentences_n").add_documents(
     clean_df,
     tensor_fields=['facts', 'issue_area', 'legal_question', 'conclusion'],
     client_batch_size=50

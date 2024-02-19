@@ -11,33 +11,9 @@ import pprint
 # docker run --name marqo -it -p 8882:8882 marqoai/marqo:latest
 
 df = pd.read_csv('./data/full_training_set.csv')
-model = "hf/multilingual-e5-large"
+# model = "hf/multilingual-e5-large"
+model = "nlpaueb/legal-bert-base-uncased"
 url = "http://localhost:8882"
-
-
-"""
-Unnamed: 0_x
-ID
-name
-href
-docket
-term
-first_party
-second_party
-facts
-facts_len
-majority_vote
-minority_vote
-first_party_winner
-decision_type
-disposition
-issue_area
-Unnamed: 0_y
-judges
-lower_court
-legal_question
-conclusion
-"""
 
 def find_tags(txt):
     soup = BeautifulSoup(txt, 'html.parser')
@@ -77,9 +53,32 @@ clean_df = df[['href', 'first_party_winner', 'facts_clean', 'issue_area', 'legal
 #     },
 # }
 
+# settings = {
+#     "index_defaults": {
+#         "model": "legal-bert-base-uncased",
+#         "model_properties": {
+#             "name": "nlpaueb/legal-bert-base-uncased",
+#             "dimensions": 512,
+#             "type": "hf",
+#         },
+#     },
+# }
+# mq = create_marqo_client(url)
+# mq.create_index("whole_legal", model=model)
+# mq.index("whole_legal").add_documents(
+#     clean_df,
+#     tensor_fields=['facts_clean', 'issue_area', 'legal_question', 'conclusion'],
+#     client_batch_size=50
+# )
+
 settings = {
+    "textPreprocessing": {
+        "splitLength": 7,
+        "splitOverlap": 0,
+        "splitMethod": "sentence",
+    },
     "index_defaults": {
-        "model": "full_filevine_docs_whole",
+        "model": "legal-bert-base-uncased",
         "model_properties": {
             "name": "nlpaueb/legal-bert-base-uncased",
             "dimensions": 512,
@@ -88,33 +87,11 @@ settings = {
     },
 }
 mq = create_marqo_client(url)
-mq.create_index("full_filevine_docs_whole", model=model)
-mq.index("full_filevine_docs_whole").add_documents(
-    clean_df,
-    tensor_fields=['facts_clean', 'issue_area', 'legal_question', 'conclusion'],
-    client_batch_size=50
-)
-
-settings = {
-    "textPreprocessing": {
-        "splitLength": 2,
-        "splitOverlap": 0,
-        "splitMethod": "sentence",
-    },
-    "index_defaults": {
-        "model": "full_filevine_docs_whole",
-        "model_properties": {
-            "name": "nlpaueb/legal-bert-base-uncased",
-            "dimensions": 512,
-            "type": "hf",
-        },
-    },
-}
-mq.create_index("full_filevine_docs_sentences", 
-                model="hf/multilingual-e5-large",
+mq.create_index("legal_sentences_7", 
+                model=model,
                 settings_dict=settings
 )
-mq.index("full_filevine_docs_sentences").add_documents(
+mq.index("legal_sentences_7").add_documents(
     clean_df,
     tensor_fields=['facts_clean', 'issue_area', 'legal_question', 'conclusion'],
     client_batch_size=50

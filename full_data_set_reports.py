@@ -6,7 +6,7 @@ from ydata_profiling import ProfileReport
 import sweetviz as sv
 # from autoviz.AutoViz_Class import AutoViz_Class
 
-raw_df = pd.read_csv('./data/full_one_hot_encoded.csv')
+raw_df = pd.read_csv('./data/final_cleaned.csv')
 raw_df.info()
 
 # profile = ProfileReport(raw_df, title="FV Train Set Report")
