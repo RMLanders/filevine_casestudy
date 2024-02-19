@@ -10,7 +10,7 @@ import pprint
 # docker rm -f marqo
 # docker run --name marqo -it -p 8882:8882 marqoai/marqo:latest
 
-df = pd.read_csv('./data/filevine_case_study_justice - train set_source data set.csv')
+df = pd.read_csv('./data/full_training_set.csv')
 model = "hf/multilingual-e5-large"
 url = "http://localhost:8882"
 
@@ -21,24 +21,32 @@ def find_tags(txt):
     return tags
 
 def clean_text(txt):
-    soup = BeautifulSoup(txt.strip(), 'html.parser')
-    clean_text = soup.get_text()
-    clean_text = re.sub('[^a-zA-Z0-9\s]', '', clean_text)
-    clean_text = clean_text.lower()
+    if pd.isna(txt):
+        clean_text = "no text found"
+    else:   
+        soup = BeautifulSoup(str(txt).strip(), 'html.parser')
+        clean_text = soup.get_text()
+        clean_text = re.sub('[^a-zA-Z0-9\s]', '', clean_text)
+        clean_text = clean_text.lower()
     return clean_text
 
 def create_marqo_client(url):
     mq = marqo.Client(url=url)
     return mq
 
-df['facts_clean'] = df['facts'].apply(clean_text)
-clean_df = df[['href', 'facts_clean', 'first_party_winner']].to_dict('records')
+df['facts'] = df['facts'].apply(clean_text)
+df['issue_area'] = df['issue_area'].apply(clean_text)
+df['legal_question'] = df['legal_question'].apply(clean_text)
+df['conclusion'] = df['conclusion'].apply(clean_text)
+clean_df = df[['href', 'first_party_winner', 'facts', 'issue_area', 'legal_question', 'conclusion']].to_dict('records')
+print(clean_df.describe())
 
 mq = create_marqo_client(url)
-mq.create_index("filevine_docs_whole", model=model)
-mq.index("filevine_docs_whole").add_documents(
+
+mq.create_index("whole", model=model)
+mq.index("whole").add_documents(
     clean_df,
-    tensor_fields=["facts_clean"],
+    tensor_fields=['facts_clean', 'issue_area', 'legal_question', 'conclusion'],
     client_batch_size=50
 )
 
@@ -49,12 +57,12 @@ settings = {
         "splitMethod": "sentence",
     },
 }
-mq.create_index("filevine_docs_sentences", 
-                model="hf/multilingual-e5-large",
+mq.create_index("sentences", 
+                model=model,
                 settings_dict=settings
 )
-mq.index("filevine_docs_sentences").add_documents(
+mq.index("sentences").add_documents(
     clean_df,
-    tensor_fields=["facts_clean"],
+    tensor_fields=['facts', 'issue_area', 'legal_question', 'conclusion'],
     client_batch_size=50
 )

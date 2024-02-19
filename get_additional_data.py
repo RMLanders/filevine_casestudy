@@ -32,6 +32,20 @@ def get_judges(json_data):
             judge_list.append(half)
     return judge_list
 
+def get_advocates(json_data):
+    advocates_list = []
+    if (not json_data["advocates"]):
+        judge_list = ["no judges found"]
+    else:
+        number_of_advocates = len(json_data["advocates"])
+        for person in range(number_of_advocates):
+            if(not json_data["advocates"][person] or not json_data["advocates"][person]["advocate"]["name"]):
+                advocates_list.append("no advocate found")
+            else:
+                half = json_data["advocates"][person]["advocate"]["name"]
+                advocates_list.append(half)
+    return advocates_list
+
 def get_lower_court(json_data):
     if (not json_data["lower_court"] or not json_data["lower_court"]["name"]):
         lower_court = "Lower Court Not Present"
@@ -51,19 +65,25 @@ for url in tqdm(urls):
         bad_urls.append(url)
         continue
         
-    judges = get_judges(res)
+    judges = ';'.join(get_judges(res))
     legal_question = get_legal_question(res)
     conclusion = get_conclusion(res)
     lower_court = get_lower_court(res)
     
-    new_row = pd.DataFrame({"href": url, "judges": judges, "lower_court": lower_court, "legal_question": legal_question, "conclusion": conclusion})
+    new_row = pd.DataFrame({"href": url
+                            , "judges": judges
+                            , "lower_court": lower_court
+                            , "legal_question": legal_question
+                            , "conclusion": conclusion},
+                            index = [0])
+
     additional_data_df = pd.concat([additional_data_df, new_row])    
     del new_row  
 
 # conn = sqlite3.connect('filevine_casestudy.db')
 # oyez_df.to_sql('oyez', conn, if_exists='replace')
 
-additional_data_df.to_csv('./data/oyez_smaller.csv')
+additional_data_df.to_csv('./data/oyez_judges_advocates_question_conclusion.csv')
 
 with open('bad_urls_one.csv', 'w', newline='\n') as file:
     writer = csv.writer(file)
