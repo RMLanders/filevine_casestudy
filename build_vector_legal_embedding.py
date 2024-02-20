@@ -77,21 +77,13 @@ settings = {
         "splitOverlap": 0,
         "splitMethod": "sentence",
     },
-    "index_defaults": {
-        "model": "legal-bert-base-uncased",
-        "model_properties": {
-            "name": "nlpaueb/legal-bert-base-uncased",
-            "dimensions": 512,
-            "type": "hf",
-        },
-    },
 }
 mq = create_marqo_client(url)
-mq.create_index("legal_sentences_7", 
-                model=model,
-                settings_dict=settings
-)
-mq.index("legal_sentences_7").add_documents(
+# mq.create_index("text_7", 
+                # model=model,
+                # settings_dict=settings
+# )
+mq.index("text_7").add_documents(
     clean_df,
     tensor_fields=['facts_clean', 'issue_area', 'legal_question', 'conclusion'],
     client_batch_size=50
