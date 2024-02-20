@@ -10,8 +10,8 @@ import pprint
 # docker rm -f marqo
 # docker run --name marqo -it -p 8882:8882 marqoai/marqo:latest
 
-# df = pd.read_csv('./data/full_training_set.csv')
-df = pd.read_csv("./data/prediction/filevine_case_study_justice - prediction set (2).csv")
+df = pd.read_csv('./data/full_training_set.csv')
+# df = pd.read_csv("./data/prediction/filevine_case_study_justice - prediction set (2).csv")
 model = "hf/multilingual-e5-large"
 url = "http://localhost:8882"
 
@@ -35,6 +35,8 @@ def create_marqo_client(url):
     mq = marqo.Client(url=url)
     return mq
 
+print(df.columns)
+
 df['facts'] = df['facts'].apply(clean_text)
 df['issue_area'] = df['issue_area'].apply(clean_text)
 df['legal_question'] = df['legal_question'].apply(clean_text)
@@ -57,10 +59,10 @@ settings = {
         "splitMethod": "sentence",
     },
 }
-# mq.create_index(ind, 
-#                 model=model,
-#                 settings_dict=settings
-# )
+mq.create_index(ind, 
+                model=model,
+                settings_dict=settings
+)
 mq.index(ind).add_documents(
     clean_df,
     tensor_fields=['facts', 'issue_area', 'legal_question', 'conclusion'],
