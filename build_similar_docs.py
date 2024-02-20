@@ -6,13 +6,11 @@ import marqo
 import pprint
 from tqdm import tqdm
 
-file = './data/full_one_hot_encoded.csv'
-df = pd.read_csv(file)
-
 url = "http://localhost:8882"
 mq = marqo.Client(url=url)
 
-df = pd.read_csv('./data/full_drop.csv')
+# df = pd.read_csv('./data/full_drop.csv')
+df = pd.read_csv('./data/prediction/prediction_full_training_set.csv')
 
 def clean_text(txt):
     if pd.isna(txt):
@@ -47,6 +45,7 @@ df['sim1_legal_question_href'] = None
 
 df['sim1_conclusion_href'] = None
 
+mind = "train_test"
 for index, row in tqdm(df.iterrows()):
     search_href = row['href']
     # facts = row['facts_clean']
@@ -62,7 +61,7 @@ for index, row in tqdm(df.iterrows()):
     # print(facts)
     # print(search_href)
     # print("===============")
-    results = mq.index("whole_legal").search(facts, search_method='TENSOR')
+    results = mq.index(mind).search(facts, search_method='TENSOR')
     results_df = pd.DataFrame(results['hits'])
     same_doc_index = results_df[results_df['href']==search_href].index
     results_df.drop(same_doc_index , inplace=True)
@@ -93,7 +92,7 @@ for index, row in tqdm(df.iterrows()):
     # print(issue_area)
     # print(search_href)
     # print("===============")
-    results = mq.index("whole_legal").search(issue_area, search_method='TENSOR')
+    results = mq.index(mind).search(issue_area, search_method='TENSOR')
     results_df = pd.DataFrame(results['hits'])
     same_doc_index = results_df[results_df['href']==search_href].index
     results_df.drop(same_doc_index , inplace=True)
@@ -123,7 +122,7 @@ for index, row in tqdm(df.iterrows()):
     # print(legal_question)
     # print(search_href)
     # print("===============")
-    results = mq.index("whole_legal").search(legal_question, search_method='TENSOR')
+    results = mq.index(mind).search(legal_question, search_method='TENSOR')
     results_df = pd.DataFrame(results['hits'])
     same_doc_index = results_df[results_df['href']==search_href].index
     results_df.drop(same_doc_index , inplace=True)
@@ -148,7 +147,7 @@ for index, row in tqdm(df.iterrows()):
     # print(conclusion)
     # print(search_href)
     # print("===============")
-    results = mq.index("whole_legal").search(conclusion, search_method='TENSOR')
+    results = mq.index(mind).search(conclusion, search_method='TENSOR')
     results_df = pd.DataFrame(results['hits'])
     same_doc_index = results_df[results_df['href']==search_href].index
     results_df.drop(same_doc_index , inplace=True)
@@ -167,4 +166,5 @@ for index, row in tqdm(df.iterrows()):
     # print("===============")
     # print("===============")
 
-df.to_csv('./data/final_script.csv')
+# df.to_csv('./data/final_script.csv')
+df.to_csv('./data/prediction/prediction_final_script.csv')    

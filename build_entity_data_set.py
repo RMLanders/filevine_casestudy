@@ -15,9 +15,10 @@ def extract_entity(party):
     print(f"{party}, {entity}")
     return entity
 
-data = pd.read_csv('./data/filevine_case_study_justice - train set_source data set.csv')
+# data = pd.read_csv('./data/filevine_case_study_justice - train set_source data set.csv')
+data = pd.read_csv("./data/prediction/filevine_case_study_justice - prediction set (2).csv")
 data['first_party_entity'] = data['first_party'].apply(lambda row: extract_entity(row))
 data['second_party_entity'] = data['second_party'].apply(lambda row: extract_entity(row))
 
 print(data)
-data.to_csv('./data/entity_df.csv')
+data.to_csv('./data/prediction/prediction_entity_df.csv')

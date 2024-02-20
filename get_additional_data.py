@@ -53,7 +53,7 @@ def get_lower_court(json_data):
         lower_court = json_data["lower_court"]["name"]
     return lower_court
 
-urls = pd.read_csv('./data/filevine_case_study_justice - train set_source data set.csv')['href']
+urls = pd.read_csv('./data/prediction/filevine_case_study_justice - prediction set (2).csv')['href']
 additional_data_df = pd.DataFrame()
 bad_urls = list()
 for url in tqdm(urls):
@@ -83,7 +83,7 @@ for url in tqdm(urls):
 # conn = sqlite3.connect('filevine_casestudy.db')
 # oyez_df.to_sql('oyez', conn, if_exists='replace')
 
-additional_data_df.to_csv('./data/oyez_judges_advocates_question_conclusion.csv')
+additional_data_df.to_csv('./data/prediction_oyez_judges_advocates_question_conclusion.csv')
 
 with open('bad_urls_one.csv', 'w', newline='\n') as file:
     writer = csv.writer(file)
