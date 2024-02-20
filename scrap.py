@@ -8,3 +8,6 @@ doc = mq.index("whole").get_document(
     expose_facets=True
 )
 
+import pandas as pd
+
+df = pd.read_csv('./data/final_script.csv')
